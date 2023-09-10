@@ -24,14 +24,14 @@ public:
     bool GetCmdDevices(std::vector<std::pair<std::string, std::string> >& device_list);
 	void SetReadCallback(std::function<void(const char *, size_t length)> callback) { mReadCallback = callback; }
 	bool IsOpened() { return mIsCmdOpened.load(); };
-
+    bool IsDisconnected() { return mIsDisconnected.load(); }
 
 private:
     std::thread *mRxThread;
     static void mRxThreadProc(void *param);
 	long long mRxCount;
     int32_t mComHandle;
-    std::atomic<bool> mIsCmdOpened, mRxThreadExitFlag;
+    std::atomic<bool> mIsCmdOpened, mRxThreadExitFlag, mIsDisconnected;
 	std::function<void(const char *, size_t length)> mReadCallback;
 };
 

@@ -14,6 +14,7 @@
 
 CmdInterfaceLinux::CmdInterfaceLinux():mRxThread(nullptr),
 mRxCount(0),
+mIsCmdOpened(false),
 mReadCallback(nullptr)
 {
     mComHandle = -1;
@@ -70,6 +71,7 @@ bool CmdInterfaceLinux::Open(std::string& port_name)
     mRxThreadExitFlag = false;
     mRxThread = new std::thread(mRxThreadProc, this);
     mIsCmdOpened = true;
+    mIsDisconnected = false;
 
     return true;
 }
@@ -84,17 +86,17 @@ bool CmdInterfaceLinux::Close()
 
     mRxThreadExitFlag = true;
 
-    if (mComHandle != -1)
-    {
-        close(mComHandle);
-        mComHandle = -1;
-    }
-
     if ((mRxThread!=nullptr) && mRxThread->joinable())
     {
         mRxThread->join();
         delete mRxThread;
         mRxThread = NULL;
+    }
+
+    if (mComHandle != -1)
+    {
+        close(mComHandle);
+        mComHandle = -1;
     }
 
     mIsCmdOpened = false;
@@ -172,6 +174,13 @@ bool CmdInterfaceLinux::ReadFromIO(uint8_t *rx_buf, uint32_t rx_buf_len, uint32_
         if (FD_ISSET(mComHandle, &read_fds))
         {
             len = (int32_t)read(mComHandle, rx_buf, rx_buf_len);
+            if (len == 0)
+            {
+                if (!mIsDisconnected)
+                {
+                    mIsDisconnected = true;
+                }
+            }
             if ((len != -1) && rx_len)
             {
                 *rx_len = len;
