@@ -83,6 +83,7 @@ public:
 	bool AssemblePacket();/*combine stantard data into data frames and calibrate*/
 	sensor_msgs::LaserScan GetLaserScan() {return output;}
 	void SetLidarFrame(const std::string lidar_frame) { mLidarFrame = lidar_frame;};
+    void SetRangeThreshold(const double range_threshold) { range_threshold_ = range_threshold;};
 private:
 	uint16_t mTimestamp;
 	double mSpeed;
@@ -95,6 +96,7 @@ private:
 	sensor_msgs::LaserScan output;
 	std::string mLidarFrame;
 	void ToLaserscan(std::vector<PointData> src);
+    double range_threshold_;
 };
 #endif
 /********************* (C) COPYRIGHT LD Robot *******END OF FILE ********/
